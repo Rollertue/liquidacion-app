@@ -2,20 +2,14 @@ import streamlit as st
 from supabase import create_client, Client
 import pandas as pd
 
-# --- CONFIGURACIÓN DE LA PÁGINA EN pages/admin.py ---
-st.set_page_config(
-    page_title="Panel Admin - Inventario", 
-    page_icon="🔐", 
-    layout="wide",
-    initial_sidebar_state="expanded"  # <-- Agrega esta línea
-)
+st.set_page_config(page_title="Panel Admin - Inventario", page_icon="🔐", layout="wide")
 
 # --- LOGIN DE SEGURIDAD ---
 def check_password():
     def password_entered():
         if st.session_state["password"] == st.secrets["PASSWORD_ADMIN"]:
             st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Eliminar contraseña de session_state por seguridad
+            del st.session_state["password"]
         else:
             st.session_state["password_correct"] = False
 
@@ -30,7 +24,6 @@ def check_password():
         return False
     return True
 
-# Si la contraseña no es correcta, frena la ejecución aquí
 if check_password():
 
     # --- CONEXIÓN A SUPABASE ---
@@ -99,7 +92,7 @@ if check_password():
         st.info("No hay productos para modificar.")
     else:
         lista_titulos = df_productos["titulo"].tolist()
-        prod_seleccionado = st.selectbox("Seleccioná el producto que querés modificar", lista_titulos)
+        prod_seleccionado = st.selectbox("Seleccioná el producto que querés modificar", lista_titulos, key="select_editar")
         datos_prod = df_productos[df_productos["titulo"] == prod_seleccionado].iloc[0]
         
         with st.form(key="editar_producto_form"):
@@ -133,3 +126,21 @@ if check_password():
                     st.rerun()
                 except Exception as e:
                     st.error(f"Error al actualizar: {e}")
+
+        st.write("---")
+        
+        # --- NUEVO FORMULARIO 3: ELIMINAR PUBLICACIÓN ---
+        st.subheader("🗑️ Eliminar una Publicación")
+        prod_a_eliminar = st.selectbox("Seleccioná el producto que querés borrar definitivamente", lista_titulos, key="select_eliminar")
+        
+        # Usamos una confirmación visual antes de borrar
+        confirmar_borrado = st.checkbox(f"Confirmo que quiero borrar permanentemente: {prod_a_eliminar}")
+        
+        if st.button("🔴 Eliminar Producto de la Base de Datos", disabled=not confirmar_borrado, use_container_width=True):
+            try:
+                # Borramos la fila en Supabase buscando por la columna 'titulo'
+                supabase.table("productos").delete().eq("titulo", prod_a_eliminar).execute()
+                st.success(f"💥 '{prod_a_eliminar}' fue eliminado con éxito.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error al eliminar: {e}")
