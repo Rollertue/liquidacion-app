@@ -24,7 +24,7 @@ def cargar_productos():
 
 # --- FUNCIÓN QUE CONTIENE TODO EL CATÁLOGO PÚBLICO ---
 def mostrar_catalogo():
-    st.title("🍳 Gran Liquidación por Cierre Comercial")
+    st.title("🍳 Gran Liquidación por Cierre de Casa Chowa")
     st.markdown("Consulta en tiempo real la disponibilidad de los artículos. Coordina la compra o envía una oferta directa por WhatsApp.")
     st.write("---")
 
